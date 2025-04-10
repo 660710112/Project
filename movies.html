@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title data-i18n="select_movie">เลือกรอบหนัง - PartyMovies</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+
+      overflow-y: auto;
+      max-height: 100vh;
+
+      font-family: 'Poppins', sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2b4c7e;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+    }
+
+    #movieList {
+      padding-bottom: 50px;
+    }
+
+    .movie-card {
+      display: flex;
+      background: #ffffff;
+      margin: 20px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .movie-card img {
+      width: 180px;
+      height: 250px;
+      object-fit: cover;
+    }
+
+    .movie-info {
+      padding: 20px;
+      flex: 1;
+    }
+
+    .movie-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #2b4c7e;
+    }
+
+    .showtimes {
+      margin: 10px 0;
+    }
+
+    .showtime-btn {
+      background: #a3d5ff;
+      color: #2b4c7e;
+      border: none;
+      padding: 8px 16px;
+      margin: 5px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .showtime-btn:hover {
+      background: #7cc6f0;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="text-align:right; padding:10px;">
+    <button onclick="setLang('th')">TH</button>
+    <button onclick="setLang('en')">EN</button>
+  </div>
+
+  <h1 data-i18n="select_movie">เลือกรอบหนัง</h1>
+  <div id="movieList"></div>
+
+  <script>
+    let currentLang = localStorage.getItem("lang") || "th";
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem("lang", lang);
+      loadLang();
+      loadMovies();
+    }
+
+    function loadLang() {
+      fetch("lang.json")
+        .then(res => res.json())
+        .then(data => {
+          const dict = data[currentLang];
+          document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            if (dict[key]) el.innerText = dict[key];
+          });
+        });
+    }
+
+    function loadMovies() {
+      fetch('movies.json?t=' + Date.now())
+        .then(res => res.json())
+        .then(data => {
+          const movieList = document.getElementById("movieList");
+          movieList.innerHTML = "";
+          data.forEach(movie => {
+            const card = document.createElement("div");
+            card.className = "movie-card";
+
+            const title = movie.title[currentLang];
+
+            card.innerHTML = `
+          <img src="${movie.poster}" alt="${title}">
+          <div class="movie-info">
+            <div class="movie-title">${title}</div>
+            <div class="showtimes">
+              ${movie.showtimes.map(time => `
+                <button class="showtime-btn" onclick="book('${movie.id}', '${time}')">${time}</button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+            movieList.appendChild(card);
+          });
+        });
+    }
+
+
+    function book(movieId, time) {
+      window.location.href = `seats.html?movie_id=${movieId}&showtime=${time}`;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadLang();
+      loadMovies();
+    });
+  </script>
+</body>
+
+</html>

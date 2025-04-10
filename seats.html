@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title data-i18n="select_seat">เลือกที่นั่ง - PartyMovies</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      background: #e6f0fa;
+      font-family: 'Poppins', sans-serif;
+      color: #333;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .screen {
+      background: #bbb;
+      height: 30px;
+      margin: 20px auto;
+      width: 60%;
+      border-radius: 8px;
+    }
+
+    .seats {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 10px;
+      justify-content: center;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .seat {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid #ccc;
+      transition: 0.2s;
+    }
+
+    .seat.normal {
+      background: #7dd3fc;
+    }
+
+    .seat.vip {
+      background: #facc15;
+    }
+
+    .seat.selected {
+      outline: 3px solid #2563eb;
+    }
+
+    .seat.booked {
+      background: #ccc;
+      pointer-events: none;
+    }
+
+    .legend {
+      margin: 20px 0;
+    }
+
+    .legend span {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 6px;
+      margin: 0 10px;
+      font-size: 14px;
+    }
+
+    .legend .normal { background: #7dd3fc; }
+    .legend .vip { background: #facc15; }
+    .legend .booked { background: #ccc; }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .lang-switch {
+      text-align: right;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="lang-switch">
+    <button onclick="setLang('th')">TH</button>
+    <button onclick="setLang('en')">EN</button>
+  </div>
+
+  <h1 data-i18n="select_seat">เลือกที่นั่ง</h1>
+  <div class="screen" data-i18n="screen">จอภาพ</div>
+
+  <div class="legend">
+    <span class="normal" data-i18n="zone_normal">โซนปกติ</span>
+    <span class="vip" data-i18n="zone_vip">โซนพรีเมียม</span>
+    <span class="booked" data-i18n="booked">จองแล้ว</span>
+  </div>
+
+  <div class="seats" id="seatGrid"></div>
+  <button onclick="confirmBooking()" data-i18n="confirm">ยืนยันการจอง</button>
+
+  <script>
+    let currentLang = localStorage.getItem("lang") || "th";
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem("lang", lang);
+      loadLang();
+    }
+
+    function loadLang() {
+      fetch("lang.json")
+        .then(res => res.json())
+        .then(data => {
+          const dict = data[currentLang];
+          document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            if (dict[key]) el.innerText = dict[key];
+          });
+        });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieId = urlParams.get('movie_id');
+    const showtime = urlParams.get('showtime');
+
+    const seatGrid = document.getElementById("seatGrid");
+    const selectedSeats = new Set();
+    const totalSeats = 50;
+
+    fetch(`get_bookings.php?movie_id=${movieId}&showtime=${showtime}`)
+  .then(res => res.json())
+  .then(booked => {
+    for (let i = 1; i <= totalSeats; i++) {
+      const seat = document.createElement("div");
+      seat.classList.add("seat");
+      const type = i <= 30 ? "normal" : "vip";
+      seat.classList.add(type);
+      seat.innerText = i;
+
+      if (booked.includes(i)) {
+        seat.classList.add("booked");
+      } else {
+        seat.addEventListener("click", () => {
+          seat.classList.toggle("selected");
+          if (selectedSeats.has(i)) selectedSeats.delete(i);
+          else selectedSeats.add(i);
+        });
+      }
+
+      seatGrid.appendChild(seat);
+    }
+  });
+
+
+    function confirmBooking() {
+      if (selectedSeats.size === 0) return alert(currentLang === "th" ? "กรุณาเลือกที่นั่ง" : "Please select at least one seat");
+
+      const seats = Array.from(selectedSeats).map(i => ({
+        index: i,
+        type: i <= 30 ? 'normal' : 'vip',
+        price: i <= 30 ? 120 : 200
+      }));
+
+      const booking = {
+        movie_id: movieId,
+        showtime: showtime,
+        seats: seats,
+        timestamp: Date.now()
+      };
+
+      fetch("book.php", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(booking)
+      }).then(() => {
+        sessionStorage.setItem("latestBooking", JSON.stringify(booking));
+        window.location.href = "payment.html";
+      });
+    }
+
+    loadLang();
+  </script>
+
+</body>
+</html>

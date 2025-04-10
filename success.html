@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n="booking_success">จองสำเร็จ - PartyMovies</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f0fff4, #f5f9fc);
+      text-align: center;
+      padding: 50px 20px;
+      color: #333;
+    }
+
+    .lang-switch {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+    }
+
+    .lang-switch button {
+      background: #ffffff;
+      border: 1px solid #cce;
+      color: #2d6a4f;
+      font-weight: bold;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-left: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .lang-switch button:hover {
+      background: #c4f1d5;
+    }
+
+    h1 {
+      color: #2d6a4f;
+      margin-bottom: 20px;
+    }
+
+    .summary {
+      font-size: 18px;
+      max-width: 500px;
+      margin: 0 auto 30px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      text-align: left;
+    }
+
+    .btn {
+      background: #2d6a4f;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #1b4332;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="lang-switch">
+    <button onclick="setLang('th')">TH</button>
+    <button onclick="setLang('en')">EN</button>
+  </div>
+
+  <h1 data-i18n="booking_success">🎉 การจองเสร็จสมบูรณ์</h1>
+
+  <div class="summary" id="bookingSummary">
+
+  </div>
+
+  <button class="btn" onclick="goHome()" data-i18n="back_home">กลับหน้าแรก</button>
+
+  <script>
+    let currentLang = localStorage.getItem("lang") || "th";
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem("lang", lang);
+  loadLang();
+}
+
+function goHome() {
+  window.location.href = "movies.html";
+}
+
+function loadLang() {
+  fetch("lang.json")
+    .then(res => res.json())
+    .then(data => {
+      const dict = data[currentLang];
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) el.innerText = dict[key];
+      });
+
+      renderSummary(dict);
+    });
+}
+
+function renderSummary(dict) {
+  const container = document.getElementById("bookingSummary");
+  const booking = JSON.parse(sessionStorage.getItem("latestBooking"));
+
+  if (booking) {
+    showBooking(booking, dict, container);
+  } else {
+    fetch("bookings.json")
+      .then(res => res.json())
+      .then(data => {
+        if (!data || data.length === 0) {
+          container.innerHTML = `<p>${currentLang === "th" ? "ไม่พบข้อมูลการจอง" : "No booking data found"}</p>`;
+          return;
+        }
+        const latest = data[data.length - 1];
+        showBooking(latest, dict, container);
+      });
+  }
+}
+
+function showBooking(booking, dict, container) {
+  const total = booking.seats.reduce((sum, s) => sum + (s.type === "vip" ? 200 : 120), 0);
+  const seats = booking.seats.map(s =>
+    `${s.index} (${s.type === "vip" ? dict.zone_vip : dict.zone_normal})`
+  ).join(", ");
+
+  container.innerHTML = `
+    <p><strong>${dict.movie}:</strong> ${booking.movie_id}</p>
+    <p><strong>${dict.showtime}:</strong> ${booking.showtime}</p>
+    <p><strong>${dict.selected_seats}:</strong> ${seats}</p>
+    <p><strong>${dict.total}:</strong> ${total} ${dict.currency}</p>
+    <p><strong>${dict.time}:</strong> ${new Date(booking.timestamp).toLocaleString()}</p>
+  `;
+}
+
+loadLang();
+
+  </script>
+</body>
+</html>

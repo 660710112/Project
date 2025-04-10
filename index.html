@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="title">Double Slider Login / Registration Form</title>
+  <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div style="text-align:right; padding:10px;">
+    <button onclick="setLang('th')">TH</button>
+    <button onclick="setLang('en')">EN</button>
+  </div>
+
+  <div class="container" id="container">
+
+    <div class="form-container register-container">
+      <form action="#" id="registerForm">
+        <h1 data-i18n="register_here">Register here.</h1>
+        <input type="text" id="regName" placeholder="Name" required data-i18n-placeholder="name">
+        <input type="email" id="regEmail" placeholder="Email" required data-i18n-placeholder="email">
+        <input type="password" id="regPassword" placeholder="Password" required data-i18n-placeholder="password">
+        <button data-i18n="register">Register</button>
+        <span data-i18n="or_use_account">or use your account</span>
+        <div class="social-container">
+          <a href="https://www.facebook.com" class="social" target="_blank">
+            <i class="lni lni-facebook-fill"></i>
+          </a>
+          <a href="https://accounts.google.com" class="social" target="_blank">
+            <i class="lni lni-google"></i>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-container login-container">
+      <form action="#" id="loginForm">
+        <h1 data-i18n="login_here">Login here.</h1>
+        <input type="email" id="loginEmail" placeholder="Email" required data-i18n-placeholder="email">
+        <input type="password" id="loginPassword" placeholder="Password" required data-i18n-placeholder="password">
+        <div class="checkbox">
+          <input type="checkbox" name="checkbox" id="checkbox">
+          <label for="checkbox" data-i18n="remember_me">Remember me</label>
+        </div>
+        <div class="pass-link">
+          <a href="#" data-i18n="forgot_password">Forgot password?</a>
+        </div>
+        <button data-i18n="login">Login</button>
+        <span data-i18n="or_use_account">or use your account</span>
+        <div class="social-container">
+          <a href="https://www.facebook.com" class="social" target="_blank">
+            <i class="lni lni-facebook-fill"></i>
+          </a>
+          <a href="https://accounts.google.com" class="social" target="_blank">
+            <i class="lni lni-google"></i>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <div class="overlay-container">
+      <div class="overlay">
+        <div class="overlay-panel overlay-left">
+          <h1 class="title">Party <br>movies</h1>
+          <p data-i18n="already_have_account">If you have an account, login here and have fun</p>
+          <button class="ghost" id="login" data-i18n="login">Login
+            <i class="lni lni-arrow-left login"></i>
+          </button>
+        </div>
+        
+        <div class="overlay-panel overlay-right">
+          <h1 class="title" data-i18n="start_journey">Start your <br> journey now</h1>
+          <p data-i18n="no_account">If you don't have an account yet, join us and start your journey.</p>
+          <button class="ghost" id="register" data-i18n="register">Register
+            <i class="lni lni-arrow-right register"></i>
+          </button>
+        </div>
+        
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    let currentLang = localStorage.getItem("lang") || "th";
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem("lang", lang);
+      loadLang();
+    }
+
+    function loadLang() {
+      fetch("lang.json")
+        .then(res => res.json())
+        .then(data => {
+          const dict = data[currentLang];
+          document.querySelectorAll("[data-i18n]").forEach(el => {
+            const key = el.getAttribute("data-i18n");
+            if (dict[key]) el.innerText = dict[key];
+          });
+          document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+            const key = el.getAttribute("data-i18n-placeholder");
+            if (dict[key]) el.placeholder = dict[key];
+          });
+        });
+    }
+
+    window.addEventListener("DOMContentLoaded", loadLang);
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+[
+  {
+    "movie_id": "m001",
+    "showtime": "13:00",
+    "seats": [
+      { "index": 12, "type": "normal" },
+      { "index": 35, "type": "vip" }
+    ],
+    "timestamp": 1712660354000
+  },
+  {
+    "movie_id": "m002",
+    "showtime": "18:30",
+    "seats": [
+      { "index": 6, "type": "normal" }
+    ],
+    "timestamp": 1712661452000
+  }
+]

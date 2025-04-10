@@ -1,0 +1,20 @@
+[
+  {
+    "id": "m001",
+    "title": {
+      "th": "อเวนเจอร์ส: เผด็จศึก",
+      "en": "Avengers: Endgame"
+    },
+    "poster": "images/endgame.jpg",
+    "showtimes": ["13:00", "16:00", "19:00"]
+  },
+  {
+    "id": "m002",
+    "title": {
+      "th": "สไปเดอร์แมน: ไม่มีทางได้กลับบ้าน",
+      "en": "Spider-Man: No Way Home"
+    },
+    "poster": "images/SpiderMan.jpg",
+    "showtimes": ["12:30", "15:30", "18:30"]
+  }
+]
